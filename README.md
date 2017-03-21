@@ -19,3 +19,9 @@
 4 rome please ok let me look into some options for you
 5 <SILENCE> api_call italian rome six cheap
 ```
+
+
+# Margin ranking loss in tf
+
+- https://github.com/fireeye/tf_rl_tutorial/blob/master/tf_rl_tutorial/models.py
+- https://www.reddit.com/r/MachineLearning/comments/5q75ks/d_ranking_loss_function_for_tensorflow/
