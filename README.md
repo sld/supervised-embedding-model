@@ -25,3 +25,14 @@
 
 - https://github.com/fireeye/tf_rl_tutorial/blob/master/tf_rl_tutorial/models.py
 - https://www.reddit.com/r/MachineLearning/comments/5q75ks/d_ranking_loss_function_for_tensorflow/
+
+
+# Utilities
+
+- Dialogs -> [Parse Dialogs] -> Context\tResponse
+- Context\tResponse -> [Build Vocabulary] -> Ind\tWord
+- Utterance, Vocabulary -> [Vectorize] -> Utterance: Vec
+- ContextVec, ResponseVec -> [Train] -> Model
+- ContextVec, ResponseVec -> [Eval] -> Score
+- ? -> [Accuracy] -> AccuracyScore
+
