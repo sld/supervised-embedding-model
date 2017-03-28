@@ -33,6 +33,6 @@
 - Context\tResponse -> [Build Vocabulary] -> Ind\tWord
 - Utterance, Vocabulary -> [Vectorize] -> Utterance: Vec
 - ContextVec, ResponseVec -> [Train] -> Model
-- ContextVec, ResponseVec -> [Eval] -> Score
-- ? -> [Accuracy] -> AccuracyScore
+- ContextVec, ResponseVec, Model -> [Eval] -> Score
+- ContextVec, ResponseVec, CandidateVec, Model -> [Accuracy] -> AccuracyScore
 
