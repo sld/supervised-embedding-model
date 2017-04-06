@@ -29,7 +29,6 @@ class Model:
         cont_mult = tf.matmul(self.context_batch, A_var)
 
         self.f = tf.diag_part(tf.matmul(tf.transpose(cont_mult), resp_mult))
-        tf.Print(self.f, [self.f])
 
         m = 0.01
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f + m))
