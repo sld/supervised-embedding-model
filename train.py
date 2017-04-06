@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from make_train_tensor import make_tensor, load_vocab
 from model import Model
+from sys import argv
 
 
 def batch_iter(tensor, batch_size, shuffle=False):
@@ -24,11 +25,12 @@ def batch_iter(tensor, batch_size, shuffle=False):
 
 
 def main(train_tensor, model):
-    train_steps = 10
+    train_steps = 5000
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for _ in tqdm(range(train_steps)):
-            for batch in batch_iter(train_tensor, 64):
+            avg_loss = 0
+            for batch in batch_iter(train_tensor, 64, True):
                 # TODO: Make f_neg in the loop
                 f_neg = sess.run(
                     model.f,
@@ -41,11 +43,14 @@ def main(train_tensor, model):
                                model.response_batch: batch[0][1],
                                model.f_neg: f_neg}
                 )
+                avg_loss += loss[0]
+            avg_loss = avg_loss / train_tensor.shape[0]
+            print(avg_loss)                
 
 
 if __name__ == '__main__':
-    train_filename = 'data/task1-train.tsv'
-    vocab_filename = 'data/vocab-train.tsv'
+    train_filename = argv[1]
+    vocab_filename = argv[2]
     vocab = load_vocab(vocab_filename)
     train_tensor = make_tensor(train_filename, vocab_filename)
     model = Model(len(vocab), 32)
