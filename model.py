@@ -27,8 +27,8 @@ class Model:
 
         resp_mult = tf.matmul(self.response_batch, B_var)
         cont_mult = tf.matmul(self.context_batch, A_var)
-
-        self.f = tf.diag_part(tf.matmul(tf.transpose(cont_mult), resp_mult))
+        # TODO: It is not completely equal with paper
+        self.f = tf.diag_part(tf.nn.tanh(tf.matmul(resp_mult, tf.transpose(cont_mult))))
 
         m = 0.01
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f + m))

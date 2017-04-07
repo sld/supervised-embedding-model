@@ -5,7 +5,10 @@ from sys import argv
 def vectorize_utt(utt, vocab):
     vec = np.zeros(len(vocab))
     for w in utt.split(' '):
-        vec[vocab[w]] += 1
+        try:
+            vec[vocab[w]] += 1
+        except KeyError:
+            pass
     return vec
 
 
@@ -44,7 +47,7 @@ def make_tensor(train_filename, vocab_filename):
     vocab = load_vocab(vocab_filename)
     train = load_train(train_filename)
     X = vectorize_all(train, vocab)
-    print(X[-10:], X.shape)
+    print(train_filename, X.shape)
     return X
 
 
