@@ -34,7 +34,7 @@ def evaluate(test_tensor, candidates_tensor, sess, model):
 
 def evaluate_one_row(candidates_tensor, true_context, sess, model, test_score):
     for batch in batch_iter(candidates_tensor, 64):
-        candidate_responses = batch[0][:, 0, :]
+        candidate_responses = batch[:, 0, :]
         context_batch = np.repeat(true_context, candidate_responses.shape[0], axis=0)
 
         scores = sess.run(

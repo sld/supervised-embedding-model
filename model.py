@@ -27,14 +27,13 @@ class Model:
 
         resp_mult = tf.matmul(self.response_batch, B_var)
         cont_mult = tf.matmul(self.context_batch, A_var)
-        # TODO: It is not completely equal with paper
-        self.f = tf.diag_part(tf.nn.tanh(tf.matmul(resp_mult, tf.transpose(cont_mult))))
+        self.f = tf.diag_part(tf.matmul(resp_mult, tf.transpose(cont_mult)))
 
         m = 0.01
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f + m))
 
-        LR = 0.001
-        self.optimizer = tf.train.GradientDescentOptimizer(LR).minimize(self.loss)
+        LR = 0.01
+        self.optimizer = tf.train.AdagradOptimizer(LR).minimize(self.loss)
 
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
