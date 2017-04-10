@@ -6,7 +6,7 @@ def vectorize_utt(utt, vocab):
     vec = np.zeros(len(vocab))
     for w in utt.split(' '):
         try:
-            vec[vocab[w]] += 1
+            vec[vocab[w]] = 1
         except KeyError:
             pass
     return vec

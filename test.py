@@ -19,12 +19,14 @@ def evaluate(test_tensor, candidates_tensor, sess, model):
     for row in tqdm(test_tensor):
         true_context = [row[0]]
         test_score = sess.run(
-            model.f,
-            feed_dict={model.context_batch: true_context, model.response_batch: [row[1]]}
+            model.f_pos,
+            feed_dict={model.context_batch: true_context,
+                       model.response_batch: [row[1]],
+                       model.neg_response_batch: [row[1]]}
         )
         test_score = test_score[0]
 
-        is_pos = evaluate_one_row(candidates_tensor, true_context, sess, model, test_score)
+        is_pos = evaluate_one_row(candidates_tensor, true_context, sess, model, test_score, row[1])
         if is_pos:
             pos += 1
         else:
@@ -32,17 +34,22 @@ def evaluate(test_tensor, candidates_tensor, sess, model):
     return (pos, neg, pos / (pos+neg))
 
 
-def evaluate_one_row(candidates_tensor, true_context, sess, model, test_score):
-    for batch in batch_iter(candidates_tensor, 64):
+def evaluate_one_row(candidates_tensor, true_context, sess, model, test_score, true_response):
+    for batch in batch_iter(candidates_tensor, 512):
         candidate_responses = batch[:, 0, :]
         context_batch = np.repeat(true_context, candidate_responses.shape[0], axis=0)
 
         scores = sess.run(
-            model.f,
-            feed_dict={model.context_batch: context_batch, model.response_batch: candidate_responses}
+            model.f_pos,
+            feed_dict={model.context_batch: context_batch,
+                       model.response_batch: candidate_responses,
+                       model.neg_response_batch: candidate_responses}
         )
-        for score in scores:
-            if score > test_score:
+        for ind, score in enumerate(scores):
+            if score == float('Inf') or score == -float('Inf') or score == float('NaN'):
+                print(score, ind, scores[ind])
+                raise ValueError
+            if score >= test_score and not np.array_equal(candidate_responses[ind], true_response):
                 return False
     return True
 

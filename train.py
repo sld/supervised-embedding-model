@@ -10,41 +10,35 @@ from utils import batch_iter, neg_sampling_iter
 
 def main(train_tensor, dev_tensor, candidates_tensor, model):
     train_steps = 400
+    batch_size = 32
+    neg_size = 100
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(train_steps):
             avg_loss = 0
-            for batch in batch_iter(train_tensor, 32, True):
-                for neg_batch in neg_sampling_iter(train_tensor, 32, 10):
-                    f_neg = sess.run(
-                        model.f,
-                        feed_dict={model.context_batch: batch[:, 0, :], model.response_batch: neg_batch[:, 1, :]}
-                    )
+            for batch in batch_iter(train_tensor, batch_size, True):
+                for neg_batch in neg_sampling_iter(train_tensor, batch_size, neg_size):
+                    # Поботай siamese network и tf relational learn tutorial
 
                     loss = sess.run(
                         [model.loss, model.optimizer],
                         feed_dict={model.context_batch: batch[:, 0, :],
                                    model.response_batch: batch[:, 1, :],
-                                   model.f_neg: f_neg}
+                                   model.neg_response_batch: neg_batch[:, 1, :]}
                     )
                     avg_loss += loss[0]
-            avg_loss = avg_loss / train_tensor.shape[0]*10
+            avg_loss = avg_loss / (train_tensor.shape[0]*neg_size)
             avg_dev_loss = 0
-            for batch in batch_iter(dev_tensor, 128):
-                for neg_batch in neg_sampling_iter(train_tensor, 128, 1):
-                    f_neg = sess.run(
-                        model.f,
-                        feed_dict={model.context_batch: batch[:, 0, :], model.response_batch: neg_batch[:, 1, :]}
+            for batch in batch_iter(dev_tensor, 256):
+                for neg_batch in neg_sampling_iter(dev_tensor, 256, 1):
+                    loss = sess.run(
+                        [model.loss],
+                        feed_dict={model.context_batch: batch[:, 0, :],
+                                   model.response_batch: batch[:, 1, :],
+                                   model.neg_response_batch: neg_batch[:, 1, :]}
                     )
-
-                loss = sess.run(
-                    [model.loss],
-                    feed_dict={model.context_batch: batch[:, 0, :],
-                               model.response_batch: batch[:, 1, :],
-                               model.f_neg: f_neg}
-                )
-                avg_dev_loss += loss[0]
-            avg_dev_loss = avg_dev_loss / dev_tensor.shape[0]
+                    avg_dev_loss += loss[0]
+            avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*1)
 
             print('Epoch: {}; Train loss: {}; Dev loss: {};'.format(
                 epoch, avg_loss, avg_dev_loss)
