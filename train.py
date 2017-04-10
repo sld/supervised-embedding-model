@@ -8,13 +8,19 @@ from test import evaluate
 from utils import batch_iter, neg_sampling_iter
 
 
-def main(train_tensor, dev_tensor, candidates_tensor, model):
-    train_steps = 400
+def main(train_tensor, dev_tensor, candidates_tensor, model, name='task1'):
+    epochs = 400
     batch_size = 32
     neg_size = 100
+    prev_best_accuracy = 0
+
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for epoch in range(train_steps):
+        # initial_step = model.global_step.eval()
+        # writer = tf.summary.FileWriter('log/supervised_emb_'+name, sess.graph)
+
+        for epoch in range(epochs):
             avg_loss = 0
             for batch in batch_iter(train_tensor, batch_size, True):
                 for neg_batch in neg_sampling_iter(train_tensor, batch_size, neg_size):
@@ -27,6 +33,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model):
                                    model.neg_response_batch: neg_batch[:, 1, :]}
                     )
                     avg_loss += loss[0]
+                    # writer.add_summary(summary, global_step=epoch)
             avg_loss = avg_loss / (train_tensor.shape[0]*neg_size)
             avg_dev_loss = 0
             for batch in batch_iter(dev_tensor, 256):
@@ -43,9 +50,14 @@ def main(train_tensor, dev_tensor, candidates_tensor, model):
             print('Epoch: {}; Train loss: {}; Dev loss: {};'.format(
                 epoch, avg_loss, avg_dev_loss)
             )
-            if epoch % 10 == 0 and epoch != 0:
+            if epoch % 5 == 0:
                 dev_eval = evaluate(dev_tensor, candidates_tensor, sess, model)
                 print('Evaluation in dev set: {}'.format(dev_eval))
+                accuracy = dev_eval[2]
+                if accuracy >= prev_best_accuracy:
+                    print('Saving Model')
+                    prev_best_accuracy = accuracy
+                    saver.save(sess, 'checkpoints/{}-best-acc'.format(name))
 
 
 if __name__ == '__main__':

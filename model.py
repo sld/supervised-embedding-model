@@ -25,6 +25,7 @@ class Model:
                 minval=-1, maxval=1
             )
         )
+        self.global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
 
         cont_mult = tf.transpose(tf.matmul(A_var, tf.transpose(self.context_batch)))
         resp_mult = tf.matmul(B_var, tf.transpose(self.response_batch))
@@ -39,9 +40,27 @@ class Model:
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f_pos + m))
 
         LR = 0.0001
-        self.optimizer = tf.train.GradientDescentOptimizer(LR).minimize(self.loss)
+        self.optimizer = tf.train.GradientDescentOptimizer(LR).minimize(
+            self.loss, global_step=self.global_step
+        )
 
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
         self.response_batch = tf.placeholder(dtype=tf.float32, name='Response', shape=[None, self._vocab_dim])
         self.neg_response_batch = tf.placeholder(dtype=tf.float32, name='NegResponse', shape=[None, self._vocab_dim])
+
+    def _init_summaries(self):
+        self.accuracy = tf.placeholder_with_default(0.0, shape=(), name='Accuracy')
+        self.accuracy_summary = tf.scalar_summary('Accuracy summary', self.accuracy)
+
+        self.f_pos_summary = tf.histogram_summary('f_pos', self.f_pos)
+        self.f_neg_summary = tf.histogram_summary('f_neg', self.f_neg)
+
+        self.loss_summary = tf.scalar_summary('Mini-batch loss', self.loss)
+        self.summary_op = tf.merge_summary(
+            [
+                self.f_pos_summary,
+                self.f_neg_summary,
+                self.loss_summary
+            ]
+        )
