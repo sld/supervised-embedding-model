@@ -57,7 +57,7 @@ def _train(train_tensor, batch_size, neg_size, model, optimizer, sess):
 def _forward_all(dev_tensor, model, sess):
     avg_dev_loss = 0
     for batch in batch_iter(dev_tensor, 256):
-        for neg_batch in neg_sampling_iter(dev_tensor, 256, 1):
+        for neg_batch in neg_sampling_iter(dev_tensor, 256, 2, 42):
             loss = sess.run(
                 [model.loss],
                 feed_dict={model.context_batch: batch[:, 0, :],
@@ -65,7 +65,7 @@ def _forward_all(dev_tensor, model, sess):
                            model.neg_response_batch: neg_batch[:, 1, :]}
             )
             avg_dev_loss += loss[0]
-    avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*1)
+    avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*2)
     return avg_dev_loss
 
 
@@ -88,6 +88,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
 
         for epoch in range(epochs):
             avg_loss = _train(train_tensor, batch_size, neg_size, model, optimizer, sess)
+            # TODO: Refine dev loss calculation
             avg_dev_loss = _forward_all(dev_tensor, model, sess)
             logger.info('Epoch: {}; Train loss: {}; Dev loss: {};'.format(epoch, avg_loss, avg_dev_loss))
 

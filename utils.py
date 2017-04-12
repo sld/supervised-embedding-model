@@ -19,9 +19,10 @@ def batch_iter(tensor, batch_size, shuffle=False):
         yield data[start_index:end_index]
 
 
-def neg_sampling_iter(tensor, batch_size, count):
+def neg_sampling_iter(tensor, batch_size, count, seed=None):
     batches_count = tensor.shape[0] // batch_size
     trials = 0
+    np.random.seed(seed)
     shuffle_indices = np.random.permutation(np.arange(tensor.shape[0]))
     data = tensor[shuffle_indices]
     for batch_num in range(batches_count):
