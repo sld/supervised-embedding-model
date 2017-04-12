@@ -31,6 +31,8 @@ def _parse_args():
     parser.add_argument('--dev', help='Path to dev filename')
     parser.add_argument('--vocab', default='data/vocab.tsv')    
     parser.add_argument('--candidates', default='data/candidates.tsv')
+    parser.add_argument('--emb_dim', default=32, type=int)
+    parser.add_argument('--save_dir')
 
     args = parser.parse_args()
 
@@ -75,6 +77,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
     neg_size = config['neg_size']
     save_dir = config['save_dir']
 
+    # TODO: Add LR decay
     optimizer = tf.train.AdagradOptimizer(0.01).minimize(model.loss)
 
     prev_best_accuracy = 0
@@ -105,6 +108,6 @@ if __name__ == '__main__':
     dev_tensor = make_tensor(args.dev, vocab)
     candidates_tensor = make_tensor(args.candidates, vocab)
     config = {'batch_size': 32, 'epochs': 400, 
-              'neg_size': 100, 'save_dir': 'checkpoints/task-1/'}
-    model = Model(len(vocab), emb_dim=32)
+              'neg_size': 100, 'save_dir': args.save_dir}
+    model = Model(len(vocab), emb_dim=args.emb_dim)
     main(train_tensor, dev_tensor, candidates_tensor, model, config)
