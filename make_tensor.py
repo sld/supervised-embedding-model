@@ -43,8 +43,9 @@ def load_train(train_filename):
     return context_response_pairs
 
 
-def make_tensor(train_filename, vocab_filename):
-    vocab = load_vocab(vocab_filename)
+def make_tensor(train_filename, vocab):
+    if type(vocab) == 'str':
+        vocab = load_vocab(vocab_filename)
     train = load_train(train_filename)
     X = vectorize_all(train, vocab)
     print(train_filename, X.shape)

@@ -1,73 +1,110 @@
 import tensorflow as tf
 import numpy as np
+import argparse
+import logging
+import sys
 from tqdm import tqdm
-from make_train_tensor import make_tensor, load_vocab
+from make_tensor import make_tensor, load_vocab
 from model import Model
 from sys import argv
 from test import evaluate
 from utils import batch_iter, neg_sampling_iter
 
 
-def main(train_tensor, dev_tensor, candidates_tensor, model, name='task1'):
-    epochs = 400
-    batch_size = 32
-    neg_size = 100
+def _setup_logger():
+    logging.basicConfig(
+        format='[%(levelname)s] %(asctime)s: %(message)s (%(pathname)s:%(lineno)d)',
+        datefmt="%Y-%m-%dT%H:%M:%S%z",
+        stream=sys.stdout)
+    logger = logging.getLogger('babi-dialog')
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+
+logger = _setup_logger()
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--train', help='Path to train filename')
+    parser.add_argument('--dev', help='Path to dev filename')
+    parser.add_argument('--vocab', default='data/vocab.tsv')    
+    parser.add_argument('--candidates', default='data/candidates.tsv')
+
+    args = parser.parse_args()
+
+    return args
+
+
+def _train(train_tensor, batch_size, neg_size, model, optimizer, sess):
+    avg_loss = 0
+    for batch in batch_iter(train_tensor, batch_size, True):
+        for neg_batch in neg_sampling_iter(train_tensor, batch_size, neg_size):
+            loss = sess.run(
+                [model.loss, optimizer],
+                feed_dict={model.context_batch: batch[:, 0, :],
+                           model.response_batch: batch[:, 1, :],
+                           model.neg_response_batch: neg_batch[:, 1, :]}
+            )
+            avg_loss += loss[0]
+    avg_loss = avg_loss / (train_tensor.shape[0]*neg_size)
+    return avg_loss
+
+
+def _forward_all(dev_tensor, model, sess):
+    avg_dev_loss = 0
+    for batch in batch_iter(dev_tensor, 256):
+        for neg_batch in neg_sampling_iter(dev_tensor, 256, 1):
+            loss = sess.run(
+                [model.loss],
+                feed_dict={model.context_batch: batch[:, 0, :],
+                           model.response_batch: batch[:, 1, :],
+                           model.neg_response_batch: neg_batch[:, 1, :]}
+            )
+            avg_dev_loss += loss[0]
+    avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*1)
+    return avg_dev_loss
+
+
+def main(train_tensor, dev_tensor, candidates_tensor, model, config):
+    logger.info('Run main with config {}'.format(config))
+
+    epochs = config['epochs']
+    batch_size = config['batch_size']
+    neg_size = config['neg_size']
+    save_dir = config['save_dir']
+
+    optimizer = tf.train.AdagradOptimizer(0.01).minimize(model.loss)
+
     prev_best_accuracy = 0
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        # initial_step = model.global_step.eval()
-        # writer = tf.summary.FileWriter('log/supervised_emb_'+name, sess.graph)
 
         for epoch in range(epochs):
-            avg_loss = 0
-            for batch in batch_iter(train_tensor, batch_size, True):
-                for neg_batch in neg_sampling_iter(train_tensor, batch_size, neg_size):
-                    # Поботай siamese network и tf relational learn tutorial
+            avg_loss = _train(train_tensor, batch_size, neg_size, model, optimizer, sess)
+            avg_dev_loss = _forward_all(dev_tensor, model, sess)
+            logger.info('Epoch: {}; Train loss: {}; Dev loss: {};'.format(epoch, avg_loss, avg_dev_loss))
 
-                    loss = sess.run(
-                        [model.loss, model.optimizer],
-                        feed_dict={model.context_batch: batch[:, 0, :],
-                                   model.response_batch: batch[:, 1, :],
-                                   model.neg_response_batch: neg_batch[:, 1, :]}
-                    )
-                    avg_loss += loss[0]
-                    # writer.add_summary(summary, global_step=epoch)
-            avg_loss = avg_loss / (train_tensor.shape[0]*neg_size)
-            avg_dev_loss = 0
-            for batch in batch_iter(dev_tensor, 256):
-                for neg_batch in neg_sampling_iter(dev_tensor, 256, 1):
-                    loss = sess.run(
-                        [model.loss],
-                        feed_dict={model.context_batch: batch[:, 0, :],
-                                   model.response_batch: batch[:, 1, :],
-                                   model.neg_response_batch: neg_batch[:, 1, :]}
-                    )
-                    avg_dev_loss += loss[0]
-            avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*1)
-
-            print('Epoch: {}; Train loss: {}; Dev loss: {};'.format(
-                epoch, avg_loss, avg_dev_loss)
-            )
             if epoch % 5 == 0:
                 dev_eval = evaluate(dev_tensor, candidates_tensor, sess, model)
-                print('Evaluation in dev set: {}'.format(dev_eval))
+                logger.info('Evaluation: {}'.format(dev_eval))
                 accuracy = dev_eval[2]
                 if accuracy >= prev_best_accuracy:
-                    print('Saving Model')
+                    logger.debug('Saving checkpoint')
                     prev_best_accuracy = accuracy
-                    saver.save(sess, 'checkpoints/{}-best-acc'.format(name))
+                    saver.save(sess, save_dir)
 
 
 if __name__ == '__main__':
-    train_filename = argv[1]
-    vocab_filename = argv[2]
-    dev_filename = argv[3]
-    candidates_filename = argv[4]
-    vocab = load_vocab(vocab_filename)
-    train_tensor = make_tensor(train_filename, vocab_filename)
-    dev_tensor = make_tensor(dev_filename, vocab_filename)
-    candidates_tensor = make_tensor(candidates_filename, vocab_filename)
-    model = Model(len(vocab), 32)
-    main(train_tensor, dev_tensor, candidates_tensor, model)
+    args = _parse_args()
+    vocab = load_vocab(args.vocab)
+    train_tensor = make_tensor(args.train, vocab)
+    dev_tensor = make_tensor(args.dev, vocab)
+    candidates_tensor = make_tensor(args.candidates, vocab)
+    config = {'batch_size': 32, 'epochs': 400, 
+              'neg_size': 100, 'save_dir': 'checkpoints/task-1/'}
+    model = Model(len(vocab), emb_dim=32)
+    main(train_tensor, dev_tensor, candidates_tensor, model, config)

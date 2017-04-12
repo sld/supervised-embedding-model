@@ -39,11 +39,7 @@ class Model:
         m = 0.01
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f_pos + m))
 
-        LR = 0.0001
-        self.optimizer = tf.train.GradientDescentOptimizer(LR).minimize(
-            self.loss, global_step=self.global_step
-        )
-
+        
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
         self.response_batch = tf.placeholder(dtype=tf.float32, name='Response', shape=[None, self._vocab_dim])

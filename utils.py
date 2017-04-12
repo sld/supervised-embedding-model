@@ -1,7 +1,5 @@
 import numpy as np
 
-np.random.seed(42)
-
 
 def batch_iter(tensor, batch_size, shuffle=False):
     batches_count = tensor.shape[0] // batch_size

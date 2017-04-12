@@ -1,4 +1,4 @@
-from make_train_tensor import make_tensor, load_vocab
+from make_tensor import make_tensor, load_vocab
 from model import Model
 from sys import argv
 from utils import batch_iter
