@@ -5,11 +5,15 @@ from utils import batch_iter
 from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
+import argparse
 
 
-def main(test_tensor, candidates_tensor, model):
+def main(test_tensor, candidates_tensor, model, checkpoint_dir):
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+        saver.restore(sess, ckpt.model_checkpoint_path)
         print(evaluate(test_tensor, candidates_tensor, sess, model))
 
 
@@ -54,12 +58,23 @@ def evaluate_one_row(candidates_tensor, true_context, sess, model, test_score, t
     return True
 
 
+def _parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--test', help='Path to test filename')
+    parser.add_argument('--vocab', default='data/vocab.tsv')
+    parser.add_argument('--candidates', default='data/candidates.tsv')
+    parser.add_argument('--checkpoint_dir')
+    parser.add_argument('--emb_dim', type=int, default=32)
+
+    args = parser.parse_args()
+
+    return args
+
 if __name__ == '__main__':
-    test_filename = argv[1]
-    candidates_filename = argv[2]
-    vocab_filename = argv[3]
-    vocab = load_vocab(vocab_filename)
-    test_tensor = make_tensor(test_filename, vocab_filename)
-    candidates_tensor = make_tensor(candidates_filename, vocab_filename)
-    model = Model(len(vocab), 32)
-    main(test_tensor, candidates_tensor, model)
+    args = _parse_args()
+    vocab = load_vocab(args.vocab)
+    test_tensor = make_tensor(args.test, vocab)
+    candidates_tensor = make_tensor(args.candidates, vocab)
+    model = Model(len(vocab), args.emb_dim)
+    main(test_tensor, candidates_tensor, model, args.checkpoint_dir)

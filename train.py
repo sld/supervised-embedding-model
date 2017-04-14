@@ -78,7 +78,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
     save_dir = config['save_dir']
 
     # TODO: Add LR decay
-    optimizer = tf.train.AdagradOptimizer(0.01).minimize(model.loss)
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(model.loss)
 
     prev_best_accuracy = 0
 
