@@ -29,7 +29,7 @@ def _parse_args():
 
     parser.add_argument('--train', help='Path to train filename')
     parser.add_argument('--dev', help='Path to dev filename')
-    parser.add_argument('--vocab', default='data/vocab.tsv')    
+    parser.add_argument('--vocab', default='data/vocab.tsv')
     parser.add_argument('--candidates', default='data/candidates.tsv')
     parser.add_argument('--emb_dim', default=32, type=int)
     parser.add_argument('--save_dir')
@@ -57,7 +57,7 @@ def _train(train_tensor, batch_size, neg_size, model, optimizer, sess):
 def _forward_all(dev_tensor, model, sess):
     avg_dev_loss = 0
     for batch in batch_iter(dev_tensor, 256):
-        for neg_batch in neg_sampling_iter(dev_tensor, 256, 2, 42):
+        for neg_batch in neg_sampling_iter(dev_tensor, 256, 1, 42):
             loss = sess.run(
                 [model.loss],
                 feed_dict={model.context_batch: batch[:, 0, :],
@@ -65,7 +65,7 @@ def _forward_all(dev_tensor, model, sess):
                            model.neg_response_batch: neg_batch[:, 1, :]}
             )
             avg_dev_loss += loss[0]
-    avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*2)
+    avg_dev_loss = avg_dev_loss / (dev_tensor.shape[0]*1)
     return avg_dev_loss
 
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     train_tensor = make_tensor(args.train, vocab)
     dev_tensor = make_tensor(args.dev, vocab)
     candidates_tensor = make_tensor(args.candidates, vocab)
-    config = {'batch_size': 32, 'epochs': 400, 
+    config = {'batch_size': 32, 'epochs': 400,
               'neg_size': 100, 'save_dir': args.save_dir}
     model = Model(len(vocab), emb_dim=args.emb_dim)
     main(train_tensor, dev_tensor, candidates_tensor, model, config)

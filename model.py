@@ -7,22 +7,23 @@ class Model:
     def __init__(self, vocab_dim, emb_dim):
         self._vocab_dim = vocab_dim
         self._emb_dim = emb_dim
+        self._random_seed = 42
         self._assemble_graph()
-        tf.set_random_seed(42)
 
     def _assemble_graph(self):
         self._create_placeholders()
+        tf.set_random_seed(self._random_seed + 1)
 
         A_var = tf.Variable(
             initial_value=tf.random_uniform(
                 shape=[self._emb_dim, self._vocab_dim],
-                minval=-1, maxval=1
+                minval=-1, maxval=1, seed=(self._random_seed + 2)
             )
         )
         B_var = tf.Variable(
             initial_value=tf.random_uniform(
                 shape=[self._emb_dim, self._vocab_dim],
-                minval=-1, maxval=1
+                minval=-1, maxval=1, seed=(self._random_seed + 3)
             )
         )
         self.global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
@@ -39,7 +40,6 @@ class Model:
         m = 0.01
         self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f_pos + m))
 
-        
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
         self.response_batch = tf.placeholder(dtype=tf.float32, name='Response', shape=[None, self._vocab_dim])
