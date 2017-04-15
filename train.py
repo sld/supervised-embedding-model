@@ -86,7 +86,9 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
     prev_best_accuracy = 0
 
     saver = tf.train.Saver()
-    with tf.Session() as sess:
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
 
         for epoch in range(epochs):
@@ -95,7 +97,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
             avg_dev_loss = _forward_all(dev_tensor, model, sess)
             logger.info('Epoch: {}; Train loss: {}; Dev loss: {};'.format(epoch, avg_loss, avg_dev_loss))
 
-            if epoch % 5 == 0:
+            if epoch % 2 == 0:
                 dev_eval = evaluate(dev_tensor, candidates_tensor, sess, model)
                 logger.info('Evaluation: {}'.format(dev_eval))
                 accuracy = dev_eval[2]
