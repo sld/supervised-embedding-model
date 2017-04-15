@@ -33,6 +33,9 @@ def _parse_args():
     parser.add_argument('--candidates', default='data/candidates.tsv')
     parser.add_argument('--emb_dim', default=32, type=int)
     parser.add_argument('--save_dir')
+    parser.add_argument('--margin', type=float, default=0.01)
+    parser.add_argument('--negative_cand', type=int, default=100)
+    parser.add_argument('--learning_rate', type=float, default=0.01)
 
     args = parser.parse_args()
 
@@ -74,11 +77,11 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
 
     epochs = config['epochs']
     batch_size = config['batch_size']
-    neg_size = config['neg_size']
+    negative_cand = config['negative_cand']
     save_dir = config['save_dir']
 
     # TODO: Add LR decay
-    optimizer = tf.train.AdamOptimizer(0.01).minimize(model.loss)
+    optimizer = tf.train.AdamOptimizer(config['lr']).minimize(model.loss)
 
     prev_best_accuracy = 0
 
@@ -87,7 +90,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config):
         sess.run(tf.global_variables_initializer())
 
         for epoch in range(epochs):
-            avg_loss = _train(train_tensor, batch_size, neg_size, model, optimizer, sess)
+            avg_loss = _train(train_tensor, batch_size, negative_cand, model, optimizer, sess)
             # TODO: Refine dev loss calculation
             avg_dev_loss = _forward_all(dev_tensor, model, sess)
             logger.info('Epoch: {}; Train loss: {}; Dev loss: {};'.format(epoch, avg_loss, avg_dev_loss))
@@ -109,6 +112,7 @@ if __name__ == '__main__':
     dev_tensor = make_tensor(args.dev, vocab)
     candidates_tensor = make_tensor(args.candidates, vocab)
     config = {'batch_size': 32, 'epochs': 400,
-              'neg_size': 100, 'save_dir': args.save_dir}
-    model = Model(len(vocab), emb_dim=args.emb_dim)
+              'negative_cand': args.negative_cand, 'save_dir': args.save_dir,
+              'lr': args.learning_rate}
+    model = Model(len(vocab), emb_dim=args.emb_dim, margin=args.margin)
     main(train_tensor, dev_tensor, candidates_tensor, model, config)

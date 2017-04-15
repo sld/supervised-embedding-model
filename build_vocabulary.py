@@ -7,12 +7,22 @@ if __name__ == '__main__':
     fin = stdin
     vocab = set()
     for line in fin:
-        context, response = line.strip().split('\t')
+        splitted = line.strip().split('\t')
+        if len(splitted) == 2:
+            context, response = splitted
+        elif len(splitted) == 1:
+            context = ''
+            response = splitted[0]
+        else:
+            raise ValueError("Wrong value {}".format(splitted))
+
         for w in context.split(' '):
-            vocab.add(w)
+            if w != '':
+                vocab.add(w)
 
         for w in response.split(' '):
-            vocab.add(w)
+            if w != '':
+                vocab.add(w)
 
     vocab = list(vocab)
     for i in range(len(vocab)):

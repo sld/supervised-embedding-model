@@ -4,10 +4,11 @@ import numpy as np
 
 
 class Model:
-    def __init__(self, vocab_dim, emb_dim):
+    def __init__(self, vocab_dim, emb_dim, margin=0.01):
         self._vocab_dim = vocab_dim
         self._emb_dim = emb_dim
         self._random_seed = 42
+        self._margin = margin
         self._assemble_graph()
 
     def _assemble_graph(self):
@@ -37,8 +38,7 @@ class Model:
         self.f_pos = pos_raw_f
         self.f_neg = neg_raw_f
 
-        m = 0.01
-        self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f_pos + m))
+        self.loss = tf.reduce_sum(tf.nn.relu(self.f_neg - self.f_pos + self._margin))
 
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
