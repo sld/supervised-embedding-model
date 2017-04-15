@@ -45,6 +45,7 @@ class Model:
         self.response_batch = tf.placeholder(dtype=tf.float32, name='Response', shape=[None, self._vocab_dim])
         self.neg_response_batch = tf.placeholder(dtype=tf.float32, name='NegResponse', shape=[None, self._vocab_dim])
 
+    # TODO: Implement summaries
     def _init_summaries(self):
         self.accuracy = tf.placeholder_with_default(0.0, shape=(), name='Accuracy')
         self.accuracy_summary = tf.scalar_summary('Accuracy summary', self.accuracy)
