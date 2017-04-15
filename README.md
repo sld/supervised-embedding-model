@@ -1,38 +1,26 @@
-1. Точность по репликам.
-2. Точность по диалогу.
+# Description
 
-## Task 1 API-calls.
+It is the implementation of Supervised embedding models from
+[[Learning End-to-End Goal-Oriented Dialog](https://arxiv.org/abs/1605.07683v3)] paper.
 
+Results almost the same as in the paper.
 
-**Пример**
-```
-1 hello hello what can i help you with today
-2 can you book a table for six people with french food  i'm on it
-3 <SILENCE> where should it be
-4 in bombay which price range are looking for
-5 i am looking for a cheap restaurant ok let me look into some options for you
-6 <SILENCE> api_call french bombay six cheap
+Here you can find Russian paper-note of the paper: [link](https://github.com/sld/deeplearning-papernotes/blob/master/notes/end-to-end-goal.md).
 
-1 hi  hello what can i help you with today
-2 can you make a restaurant reservation with italian cuisine for six people in a cheap price range  i'm on it
-3 <SILENCE> where should it be
-4 rome please ok let me look into some options for you
-5 <SILENCE> api_call italian rome six cheap
-```
+# Environment
+
+* Python 3.6.0
+* tensorflow 1.0.0
+* Dialog bAbI Tasks Data 1-6 corpus, download by the [link](https://research.fb.com/downloads/babi/).
+This corpus should be placed in data/dialog-bAbI-tasks directory.
 
 
-# Margin ranking loss in tf
+All packages are listed in requirements.txt.
 
-- https://github.com/fireeye/tf_rl_tutorial/blob/master/tf_rl_tutorial/models.py
-- https://www.reddit.com/r/MachineLearning/comments/5q75ks/d_ranking_loss_function_for_tensorflow/
+# Reproduce results
 
+0. Setup the environment.
+1. Run: `bin/train_all.sh`
+2. After approx. 1 hour run it in test set: `bin/test_all.sh`
 
-# Utilities
-
-- Dialogs -> [Parse Dialogs] -> Context\tResponse
-- Context\tResponse -> [Build Vocabulary] -> Ind\tWord
-- Utterance, Vocabulary -> [Vectorize] -> Utterance: Vec
-- ContextVec, ResponseVec -> [Train] -> Model
-- ContextVec, ResponseVec, Model -> [Eval] -> Score
-- ContextVec, ResponseVec, CandidateVec, Model -> [Accuracy] -> AccuracyScore
 
