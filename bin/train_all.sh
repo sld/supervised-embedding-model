@@ -1,0 +1,6 @@
+screen -S task1 -d -m bash -c "bin/task1.sh True > log/task1"
+screen -S task2 -d -m bash -c "bin/task2.sh True > log/task2"
+screen -S task3 -d -m bash -c "bin/task3.sh True > log/task3"
+screen -S task4 -d -m bash -c "bin/task4.sh True > log/task4"
+screen -S task5 -d -m bash -c "bin/task5.sh True > log/task5"
+screen -S task6 -d -m bash -c "bin/task6.sh True > log/task6"
