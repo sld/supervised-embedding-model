@@ -10,7 +10,9 @@ import argparse
 
 def main(test_tensor, candidates_tensor, model, checkpoint_dir):
     saver = tf.train.Saver()
-    with tf.Session() as sess:
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         saver.restore(sess, ckpt.model_checkpoint_path)
