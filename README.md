@@ -26,6 +26,8 @@ All packages are listed in requirements.txt.
 
 # Results
 
+16.03.17.
+
 In the table per-response accuracy is shown.
 
 <table>
@@ -108,5 +110,8 @@ In the table per-response accuracy is shown.
   </tr>
 </table>
 
+Open question:
 
-
+1. When we training with use_history=True should we test on pre-processed
+dataset as in train? Or should we concat each output in test and build history
+on the fly?
