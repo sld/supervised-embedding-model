@@ -24,3 +24,89 @@ All packages are listed in requirements.txt.
 2. After approx. 1 hour run it in test set: `bin/test_all.sh`
 
 
+# Results
+
+In the table per-response accuracy is shown.
+
+<table>
+  <tr>
+    <td>
+      Task
+    </td>
+    <td>
+      Supervised Embedding (Article)
+    </td>
+    <td>
+      Supervised Embedding (Ours)
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T1: Issuing API calls
+    </td>
+    <td>
+      100
+    </td>
+    <td>
+      99.6
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T2: Updating API calls
+    </td>
+    <td>
+      68.4
+    </td>
+    <td>
+      68.4
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T3: Displaying options
+    </td>
+    <td>
+      64.9
+    </td>
+    <td>
+      56.9
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T4: Providing information
+    </td>
+    <td>
+      57.2
+    </td>
+    <td>
+      57.1
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T5: Full dialogs
+    </td>
+    <td>
+      75.4
+    </td>
+    <td>
+      62.1
+    </td>
+  </tr>
+  <tr>
+    <td>
+      T6: Dialog state tracking 2
+    </td>
+    <td>
+      22.6
+    </td>
+    <td>
+      10.8
+    </td>
+  </tr>
+</table>
+
+
+

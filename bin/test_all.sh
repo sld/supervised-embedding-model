@@ -23,5 +23,5 @@ python test.py --test data/test-task-5.tsv --candidates data/candidates.tsv \
 
 
 echo "Task-6 on test set"
-python test.py --test data/test-task-6.tsv --candidates data/candidates.tsv \
+python test.py --test data/test-task-6.tsv --candidates data/candidates-dstc2.tsv \
   --vocab data/vocab-task-6.tsv --checkpoint_dir checkpoints/task-6 --emb_dim 128
