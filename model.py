@@ -4,8 +4,9 @@ import numpy as np
 
 
 class Model:
-    def __init__(self, vocab_dim, emb_dim, margin=0.01):
+    def __init__(self, vocab_dim, emb_dim, vocab_topic_dim, margin=0.01):
         self._vocab_dim = vocab_dim
+        self._vocab_topic_dim = vocab_topic_dim
         self._emb_dim = emb_dim
         self._random_seed = 42
         self._margin = margin
@@ -42,6 +43,7 @@ class Model:
 
     def _create_placeholders(self):
         self.context_batch = tf.placeholder(dtype=tf.float32, name='Context', shape=[None, self._vocab_dim])
+        self.context_topic_batch = tf.placeholder(dtype=tf.float32, name='ContextTopic', shape=[None, self._vocab_topic_dim])
         self.response_batch = tf.placeholder(dtype=tf.float32, name='Response', shape=[None, self._vocab_dim])
         self.neg_response_batch = tf.placeholder(dtype=tf.float32, name='NegResponse', shape=[None, self._vocab_dim])
 
