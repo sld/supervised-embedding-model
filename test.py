@@ -8,7 +8,7 @@ import tensorflow as tf
 import argparse
 
 
-def main(test_tensor, candidates_tensor, model, checkpoint_dir):
+def main(test_tensor, candidates_tensor, model, checkpoint_dir, dev_topic_tensor):
     saver = tf.train.Saver()
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -16,7 +16,7 @@ def main(test_tensor, candidates_tensor, model, checkpoint_dir):
         sess.run(tf.global_variables_initializer())
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         saver.restore(sess, ckpt.model_checkpoint_path)
-        print(evaluate(test_tensor, candidates_tensor, sess, model))
+        print(evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor))
 
 
 def evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor):
@@ -70,6 +70,8 @@ def _parse_args():
 
     parser.add_argument('--test', help='Path to test filename')
     parser.add_argument('--vocab', default='data/vocab.tsv')
+    parser.add_argument('--test_topic', help='Path to test topic filename')
+    parser.add_argument('--vocab_topic')
     parser.add_argument('--candidates', default='data/candidates.tsv')
     parser.add_argument('--checkpoint_dir')
     parser.add_argument('--emb_dim', type=int, default=32)
@@ -83,6 +85,8 @@ if __name__ == '__main__':
     args = _parse_args()
     vocab = load_vocab(args.vocab)
     test_tensor = make_tensor(args.test, vocab)
+    vocab_topic = load_vocab(args.vocab_topic)
+    test_topic = make_tensor(args.test_topic, vocab_topic)
     candidates_tensor = make_tensor(args.candidates, vocab)
-    model = Model(len(vocab), args.emb_dim)
-    main(test_tensor, candidates_tensor, model, args.checkpoint_dir)
+    model = Model(len(vocab), args.emb_dim, len(vocab_topic))
+    main(test_tensor, candidates_tensor, model, args.checkpoint_dir, test_topic)
