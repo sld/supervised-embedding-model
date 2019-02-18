@@ -94,9 +94,10 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config, train_topic
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
+        summ_writer = tf.summary.FileWriter('log', sess.graph)
         sess.run(tf.global_variables_initializer())
 
-        for epoch in range(epochs):
+        for epoch in tqdm(range(epochs)):
             avg_loss = _train(train_tensor, batch_size, negative_cand, model, optimizer, sess, train_topic_tensor)
             # TODO: Refine dev loss calculation
             avg_dev_loss = _forward_all(dev_tensor, model, sess, dev_topic_tensor)
@@ -125,4 +126,5 @@ if __name__ == '__main__':
               'negative_cand': args.negative_cand, 'save_dir': args.save_dir,
               'lr': args.learning_rate}
     model = Model(len(vocab), emb_dim=args.emb_dim, margin=args.margin, vocab_topic_dim=len(vocab_topic))
+    model._init_summaries()
     main(train_tensor, dev_tensor, candidates_tensor, model, config, train_topic_tensor, dev_topic_tensor)

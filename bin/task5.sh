@@ -12,8 +12,8 @@ if [ "$WITH_PREPROCESS" == "True" ]; then
   parse_dialogs 'dialog-babi-task5-full-dialogs' $task "--ignore_options --with_history"
 fi
 
-python train.py --train data/train-$task.tsv --dev data/dev-$task-500-ordered.tsv \
+python train.py --train data/train-$task.tsv --dev data/dev-$task.tsv \
   --vocab data/vocab-$task.tsv --emb_dim 32 --save_dir checkpoints/$task/model \
-  --margin 0.01 --negative_cand 100 --learning_rate 0.01 \
+  --margin 0.01 --negative_cand 100 --learning_rate 0.001 \
   --vocab_topic data/vocab-topic.tsv --train_topic data/train-task-5-topic.tsv \
-  --dev_topic data/dev-task-5-topic-500-ordered.tsv
+  --dev_topic data/dev-task-5-topic.tsv
