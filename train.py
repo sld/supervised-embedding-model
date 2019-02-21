@@ -101,6 +101,7 @@ def main(train_tensor, dev_tensor, candidates_tensor, model, config, train_topic
             avg_loss = _train(train_tensor, batch_size, negative_cand, model, optimizer, sess, train_topic_tensor)
             # TODO: Refine dev loss calculation
             avg_dev_loss = _forward_all(dev_tensor, model, sess, dev_topic_tensor)
+
             logger.info('Epoch: {}; Train loss: {}; Dev loss: {};'.format(epoch, avg_loss, avg_dev_loss))
 
             if epoch % 2 == 0:
@@ -122,9 +123,9 @@ if __name__ == '__main__':
     train_topic_tensor = make_tensor(args.train_topic, vocab_topic)
     dev_topic_tensor = make_tensor(args.dev_topic, vocab_topic)
     candidates_tensor = make_tensor(args.candidates, vocab)
-    config = {'batch_size': 32, 'epochs': 400,
+    config = {'batch_size': 32, 'epochs': 50,
               'negative_cand': args.negative_cand, 'save_dir': args.save_dir,
               'lr': args.learning_rate}
     model = Model(len(vocab), emb_dim=args.emb_dim, margin=args.margin, vocab_topic_dim=len(vocab_topic))
     model._init_summaries()
-    main(train_tensor, dev_tensor, candidates_tensor, model, config, train_topic_tensor, dev_topic_tensor)
+    main(train_tensor, dev_tensor[:500], candidates_tensor, model, config, train_topic_tensor, dev_topic_tensor[:500])

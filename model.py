@@ -38,14 +38,16 @@ class Model:
         D_var = tf.Variable(
             initial_value=tf.random_uniform(
                 shape=[self._topic_emb_dim + self._emb_dim, self._emb_dim],
-                minval=-1, maxval=1, seed=(self._random_seed + 4)
+                minval=-1, maxval=1, seed=(self._random_seed + 5)
             )
         )
         self.global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
 
         cont_mult = tf.transpose(tf.matmul(A_var, tf.transpose(self.context_batch)))
         topic_mult = tf.transpose(tf.matmul(C_var, tf.transpose(self.context_topic_batch)))
-        cont_topic = tf.matmul(tf.concat([cont_mult, topic_mult], 1), D_var)
+        # cont_topic = cont_mult
+        concated = tf.concat([cont_mult, topic_mult], 1)
+        cont_topic = tf.matmul(concated, D_var)
 
         # cont topic ->>> Concat! Batch x EmbDim, concat axis 0 => Batch x EmbDim*2
         # Batch x EmbDim*2 * EmbDix*2 x Batch => BatchxBatch

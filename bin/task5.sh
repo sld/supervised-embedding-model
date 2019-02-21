@@ -13,7 +13,7 @@ if [ "$WITH_PREPROCESS" == "True" ]; then
 fi
 
 python train.py --train data/train-$task.tsv --dev data/dev-$task.tsv \
-  --vocab data/vocab-$task.tsv --emb_dim 32 --save_dir checkpoints/$task/model \
+  --vocab data/vocab-$task.tsv --emb_dim 32 --save_dir checkpoints/$task-new/model \
   --margin 0.01 --negative_cand 100 --learning_rate 0.001 \
   --vocab_topic data/vocab-topic.tsv --train_topic data/train-task-5-topic.tsv \
   --dev_topic data/dev-task-5-topic.tsv

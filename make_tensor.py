@@ -55,4 +55,4 @@ def make_tensor(train_filename, vocab):
 if __name__ == '__main__':
     train_filename = argv[1]
     vocab_filename = argv[2]
-    main(train_filename, vocab_filename)
+    make_tensor(train_filename, vocab_filename)

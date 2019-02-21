@@ -6,17 +6,21 @@ from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
 import argparse
+import sys
 
 
 def main(test_tensor, candidates_tensor, model, checkpoint_dir, dev_topic_tensor):
     saver = tf.train.Saver()
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
+
     with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+
         saver.restore(sess, ckpt.model_checkpoint_path)
-        print(evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor))
+        dev_eval = evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor)
+        print("Eval: {}".format(dev_eval))
 
 
 def evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor):
@@ -44,7 +48,7 @@ def evaluate(test_tensor, candidates_tensor, sess, model, dev_topic_tensor):
 
 
 def evaluate_one_row(candidates_tensor, true_context, sess, model, test_score, true_response, true_topic):
-    for batch, _ in batch_iter(candidates_tensor, 512, candidates_tensor):
+    for batch, _ in batch_iter(candidates_tensor, 256, candidates_tensor):
         candidate_responses = batch[:, 0, :]
         context_batch = np.repeat(true_context, candidate_responses.shape[0], axis=0)
         topic_batch = np.repeat(true_topic, candidate_responses.shape[0], axis=0)
@@ -75,6 +79,7 @@ def _parse_args():
     parser.add_argument('--candidates', default='data/candidates.tsv')
     parser.add_argument('--checkpoint_dir')
     parser.add_argument('--emb_dim', type=int, default=32)
+    parser.add_argument('--margin', type=float, default=0.01)
 
     args = parser.parse_args()
 
@@ -88,5 +93,5 @@ if __name__ == '__main__':
     vocab_topic = load_vocab(args.vocab_topic)
     test_topic = make_tensor(args.test_topic, vocab_topic)
     candidates_tensor = make_tensor(args.candidates, vocab)
-    model = Model(len(vocab), args.emb_dim, len(vocab_topic))
+    model = Model(len(vocab), emb_dim=args.emb_dim, margin=args.margin, vocab_topic_dim=len(vocab_topic))
     main(test_tensor, candidates_tensor, model, args.checkpoint_dir, test_topic)
