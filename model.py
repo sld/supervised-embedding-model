@@ -45,9 +45,9 @@ class Model:
 
         cont_mult = tf.transpose(tf.matmul(A_var, tf.transpose(self.context_batch)))
         topic_mult = tf.transpose(tf.matmul(C_var, tf.transpose(self.context_topic_batch)))
-        # cont_topic = cont_mult
-        concated = tf.concat([cont_mult, topic_mult], 1)
-        cont_topic = tf.matmul(concated, D_var)
+        cont_topic = cont_mult
+        # concated = tf.concat([cont_mult, topic_mult], 1)
+        # cont_topic = tf.matmul(concated, D_var)
 
         # cont topic ->>> Concat! Batch x EmbDim, concat axis 0 => Batch x EmbDim*2
         # Batch x EmbDim*2 * EmbDix*2 x Batch => BatchxBatch
@@ -56,6 +56,8 @@ class Model:
         resp_mult = tf.matmul(B_var, tf.transpose(self.response_batch))
         neg_resp_mult = tf.matmul(B_var, tf.transpose(self.neg_response_batch))
 
+        # cont_topic - BatchSize x EmbDim
+        # resp_mult - EmbDim x BatchSize
         pos_raw_f = tf.diag_part(tf.matmul(cont_topic, resp_mult))
         neg_raw_f = tf.diag_part(tf.matmul(cont_topic, neg_resp_mult))
         self.f_pos = pos_raw_f
